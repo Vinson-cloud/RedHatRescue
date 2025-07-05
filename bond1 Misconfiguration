@@ -1,0 +1,25 @@
+In order to resolve the issue, below are the step by step process:
+
+   1. Delete all the existing configuration of bond1 and its slave
+
+      # nmcli connection delete "Bond bond1"
+      # nmcli connection delete "System eno5"
+      # nmcli connection delete "System eno6"
+      # nmcli connection delete bond1.1005
+      # nmcli connection delete bond1.1031
+      # nmcli connection delete bond1.242
+
+
+   2. Configure the bond and vlan again
+
+      # nmcli connection add type bond ifname bond1 con-name bond1  bond.options "mode=802.3ad,miimon=100" 
+      # nmcli connection modify bond1 ipv4.method disabled ipv6.method ignore
+
+      # nmcli connection add type bond-slave ifname eno5 con-name eno5 master bond1
+      # nmcli connection add type bond-slave ifname eno6 con-name eno6 master bond1
+
+      # nmcli connection up bond1
+
+      # nmcli connection add type vlan ifname bond1.1005 con-name bond1.1005 id 1005 dev bond1 ip4 10.5.164.115/29 gw4 10.5.164.113 ipv4.method manual
+      # nmcli connection add type vlan ifname bond1.1031 con-name bond1.1031 id 1031 dev bond1 ip4 10.4.223.58/29 gw4 10.4.223.57 ipv4.method manual
+      # nmcli connection add type vlan ifname bond1.242 con-name bond1.242 id 242 dev bond1 ip4 192.168.242.21/24 gw4 192.168.242.1 ipv4.method manual
