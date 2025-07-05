@@ -1,0 +1,30 @@
+# yum install leapp
+# yum# - "Peer's certificate issuer has been marked as not trusted by the user."
+# refer Why does yum fail with error Peer's certificate issuer has been marked as not trusted by the user?
+          https://access.redhat.com/solutions/2989291
+
+In order to resolve the issue, below are the step by step process:
+  1. Performed the following steps on the affected host to fix the "Peer's certificate issuer has been marked as not trusted by the user.", 
+     which the customer was getting during installation of the package.
+
+     # export KATELLO=$(rpm -qa | grep katello-ca-consumer)
+     # rpm -e $KATELLO
+     # yum localinstall http://satellite.example.com/pub/katello-ca-consumer-latest.noarch.rpm
+     # yum install leapp
+
+
+  2. After performing step 1 we found out that the host was registered with the RHEL7 content view, which has only RHEL7 repositories available, but to perform the
+     leapp upgrade, we should have the RHEL8.10 repositories in the associated content view.
+
+     # subscription-manager remove --all
+     # subscription-manager unregister
+     # subscription-manager clean
+     # yum clean all
+ 
+     #in the example below the Activation Key can be changed to any RHEL 8 Content View
+      that has been set up if there is a team specific CV
+
+     # subscription-manager register --org="IaaS_Org" --activationkey="iaas-rhel8" 
+     # subscription-manager refresh 
+
+     After we re-register the problematic host, and then RHEL8.10 repositories were available to perform the leapp upgrade.
